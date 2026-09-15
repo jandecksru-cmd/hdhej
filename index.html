@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>ТЫКНИ ЕГО</title>
+<style>
+:root{--bg:#0c0f17;--panel:#151a28;--panel2:#1d2435;--line:#30394f;--text:#f7f8fb;--muted:#9da7bd;--gold:#f6c343;--blue:#7180ff;--green:#5ed38a;--red:#ef6475}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif;overflow:hidden}button{font:inherit;color:inherit;border:0;cursor:pointer}#game{width:100%;height:100%;max-width:620px;margin:auto;background:radial-gradient(circle at 50% 35%,#222a40 0,#111522 42%,#0c0f17 75%);display:flex;flex-direction:column}
+header{padding:calc(9px + env(safe-area-inset-top)) 12px 8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.stat{background:#181e2d;border:1px solid var(--line);border-radius:15px;padding:7px;text-align:center}.stat b{display:block;font-size:16px}.stat span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+main{flex:1;position:relative;overflow:hidden;padding-bottom:78px}.screen{height:100%;display:none;overflow:auto;padding:10px 12px 100px}.screen.active{display:block}.home{height:100%;display:flex!important;flex-direction:column;align-items:center;justify-content:center;padding:8px 20px 92px!important;overflow:hidden!important}
+.world{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:#b8c1d7;font-weight:900}.level{font-size:27px;font-weight:1000;margin:5px 0 4px}.bar{height:8px;background:#252d40;border-radius:99px;width:min(420px,88%);overflow:hidden}.bar i{display:block;height:100%;background:linear-gradient(90deg,#f6c343,#ff7d68,#8d79ff);width:0}.next{font-size:11px;color:var(--muted);margin:7px 0 10px}
+.character-stage{width:min(78vw,360px);height:min(78vw,360px);display:flex;align-items:center;justify-content:center;background-position:center;background-size:cover;background-repeat:no-repeat;border-radius:28px;transition:background-image .12s ease;}.character-stage #target{width:100%;height:100%;}.character-stage #target img{position:relative;z-index:1;}
+#target{width:min(68vw,300px);height:min(68vw,300px);border:0;background:none;position:relative;display:flex;align-items:center;justify-content:center;touch-action:manipulation;user-select:none;transition:transform .07s;overflow:visible;filter:drop-shadow(0 25px 30px #0009)}#target:active{transform:scale(.92)}#target img{width:100%;height:100%;object-fit:contain}.pulse{animation:pulse .5s ease}@keyframes pulse{50%{transform:scale(1.06) rotate(-2deg)}}
+.tap{margin-top:7px;padding:15px 38px;background:var(--gold);color:#17130b;border-radius:18px;font-size:19px;font-weight:1000;box-shadow:0 6px 0 #a97d18}.tap:active{transform:translateY(5px);box-shadow:0 1px 0 #a97d18}.float{position:absolute;font-weight:1000;pointer-events:none;animation:up .8s ease-out forwards;z-index:9}@keyframes up{to{transform:translateY(-100px) scale(1.15);opacity:0}}
+nav{position:absolute;bottom:0;left:0;right:0;height:78px;padding-bottom:env(safe-area-inset-bottom);display:grid;grid-template-columns:repeat(4,1fr);background:#111622f5;border-top:1px solid var(--line);z-index:20}.navbtn{background:none;color:#8e99b1;font-size:10px;font-weight:900}.navbtn.active{color:#fff}.navbtn img{width:27px;height:27px;display:block;margin:6px auto 2px}
+h2{margin:5px 0 13px;font-size:23px}.card{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:12px;margin:8px 0}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.muted{color:var(--muted);font-size:12px}.buy{background:var(--blue);padding:9px 11px;border-radius:12px;font-weight:900;white-space:nowrap}.buy:disabled{opacity:.35}.tag{display:inline-block;background:#293148;border-radius:8px;padding:4px 7px;font-size:10px;color:#bac4db;margin:2px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.creature-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center;min-height:106px}.creature-card img{width:55px;height:55px}.locked{opacity:.42}.daily{background:linear-gradient(135deg,#242d4a,#1b2132);border:1px solid #48537c}.big{font-size:34px;font-weight:1000}.danger{background:#9d3d4d}.toast{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:#f7f8fb;color:#11151f;border-radius:14px;padding:10px 14px;font-weight:950;z-index:50;display:none;box-shadow:0 10px 30px #0008}.toast.show{display:block}.modal{position:absolute;inset:10px;background:#111624f5;border:1px solid var(--line);border-radius:22px;padding:18px;z-index:40;display:none;overflow:auto}.modal.show{display:block}.close{float:right;background:#2a3247;border-radius:10px;padding:7px 10px}.center{text-align:center}.shopitem{min-height:75px}.smallbtn{background:#2b344b;padding:7px 9px;border-radius:10px;font-weight:800}.season{border:1px solid #5c6685;background:#1a2132;border-radius:17px;padding:12px;margin-bottom:10px}
+
+/* FINAL MOBILE/PANEL FIX */
+* { box-sizing: border-box; }
+html, body { width:100%; min-height:100%; margin:0; padding:0; }
+body { overflow-x:hidden !important; overflow-y:auto !important; }
+#game, .app, .shell, .game { min-height:100dvh; height:auto !important; }
+.modal, .panel, .overlay, [class*="modal"], [class*="panel"] {
+  max-width: min(94vw, 760px) !important;
+  max-height: min(86dvh, 900px) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.overlay, [class*="backdrop"] {
+  position:fixed !important;
+  inset:0 !important;
+  overflow:auto !important;
+  z-index:9998 !important;
+}
+button, .btn { touch-action: manipulation; min-height:44px; }
+@media (max-width: 600px) {
+  .modal, .panel, [class*="modal"], [class*="panel"] {
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 24px) !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+  }
+  .grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+  .cards, .collection-grid, .upgrade-grid { grid-template-columns: repeat(2, minmax(0,1fr)) !important; }
+}
+
+</style></head>
+<body><div id="game">
+<header>
+<div class="stat"><span>ТЫКИ</span><b id="coins">0</b></div>
+<div class="stat"><span>В СЕКУНДУ</span><b id="dps">0</b></div>
+<div class="stat"><span>ИСКРЫ</span><b id="sparks">0</b></div>
+</header>
+<main>
+<section id="home" class="screen home active">
+<div class="world" id="world">МИР 1 · ДВОР</div><div class="level" id="level">УРОВЕНЬ 1</div>
+<div class="bar"><i id="progress"></i></div><div class="next" id="next">Эволюция через 9 уровней</div>
+<div id="characterStage" class="character-stage" style="background-image:url('assets/background/bg01.JPEG')"><button id="target"><img id="characterImage" src="assets/char01_normal.PNG" alt=""></button></div>
+<button class="tap" id="tap">ТЫКНИ ЕГО</button>
+<div id="toast" class="toast"></div>
+</section>
+
+<section id="upgrades" class="screen"><h2>Улучшения <span class="tag" id="upgradeCount">0/200</span></h2><div id="upgradeList"></div></section>
+<section id="collection" class="screen"><h2>Коллекция</h2><div class="card"><b id="collectionCount">0/20</b><div class="muted">Собери всех и найди секретные формы.</div></div><div id="collectionGrid" class="grid"></div></section>
+<section id="progressScreen" class="screen"><h2>Прогресс</h2>
+<div class="card"><div class="muted">Текущий цикл</div><div class="big" id="cycle">1</div><div class="muted">Уровень <b id="pLevel">1</b> / 1000</div></div>
+<div class="card daily"><b>ЕЖЕДНЕВНАЯ НАГРАДА</b><p id="dailyText" class="muted"></p><button class="buy" id="dailyBtn">ЗАБРАТЬ</button></div>
+<div class="card"><b>Задания дня</b><div id="quests"></div></div>
+<div class="card"><b>Перерождение</b><p class="muted">На 1000 уровне сбросит текущий цикл и даст постоянные Искры.</p><button class="buy danger" id="prestigeBtn">ПЕРЕРОДИТЬСЯ</button></div>
+<div class="card"><b>Секреты</b><div id="secrets"></div></div>
+</section>
+
+<nav>
+<button class="navbtn active" data-go="home"><img src="assets/tap.svg">ТЫК</button>
+<button class="navbtn" data-go="upgrades"><img src="assets/upgrade.svg">АПГРЕЙДЫ</button>
+<button class="navbtn" data-go="collection"><img src="assets/collection.svg">КОЛЛЕКЦИЯ</button>
+<button class="navbtn" data-go="progressScreen"><img src="assets/progress.svg">ПРОГРЕСС</button>
+</nav>
+</main>
+</div>
+<script>
+const WORLDS=['Двор','Город','Джунгли','Океан','Пустыня','Космос','Ад','Лёд','Мозг','Ничего'];
+const WORLD_TITLES=['Яйцо','Городской тип','Зелёный монстр','Глубоководный','Песчаный','Звёздный','Адский','Ледяной','Разум','Нечто'];
+const SAVE='tykni_ego_final_v1';
+let s=JSON.parse(localStorage.getItem(SAVE)||'null')||{
+coins:0,sparks:0,level:1,cycle:1,click:1,dps:0,totalClicks:0,upgrades:[],
+collection:Array(20).fill(false),secrets:[],dailyDay:0,lastDaily:'',quests:[0,0,0],last:Date.now()
+};
+function save(){s.last=Date.now();localStorage.setItem(SAVE,JSON.stringify(s))}
+if(!Array.isArray(s.collection))s.collection=[];s.collection=s.collection.slice(0,20);while(s.collection.length<20)s.collection.push(false);
+const $=x=>document.getElementById(x);
+const fmt=n=>{if(n<1000)return Math.floor(n);let u=['K','M','B','T','Qa','Qi','Sx','Sp','Oc','No'];let i=-1;while(n>=1000&&i<u.length-1){n/=1000;i++}return n.toFixed(n<10?2:n<100?1:0)+u[i]};
+const upgradeNames=[];
+const cats=['ПАЛЕЦ','АВТОТЫК','КРИТ','СКОРОСТЬ','ЭВОЛЮЦИЯ','КОЛЛЕКЦИЯ','СЕКРЕТЫ','БОГАТСТВО','ВРЕМЯ','СОБЫТИЯ','БОССЫ','МИРЫ','ПЕРСОНАЖИ','СКИНЫ','ЗАДАНИЯ','ДОСТИЖЕНИЯ','ПАРАЛЛЕЛЬ','ИСКРЫ','МЕГА','АБСОЛЮТ'];
+cats.forEach((c,j)=>{for(let k=1;k<=10;k++)upgradeNames.push(`${c} ${['I','II','III','IV','V','VI','VII','VIII','IX','X'][k-1]}`)});
+const costs=upgradeNames.map((_,i)=>Math.floor(25*Math.pow(1.145,i)));
+function worldIndex(){return Math.min(9,Math.floor((s.level-1)/100))}
+function render(){
+ $('coins').textContent=fmt(s.coins);$('dps').textContent=fmt(s.dps);$('sparks').textContent=fmt(s.sparks);
+ const wi=worldIndex();$('world').textContent=`МИР ${wi+1} · ${WORLDS[wi].toUpperCase()}`;$('level').textContent='УРОВЕНЬ '+s.level;
+ $('progress').style.width=((s.level%100||100))+'%';$('next').textContent=s.level>=1000?'ГОТОВО: ПЕРЕРОЖДЕНИЕ':`Эволюция через ${10-(s.level%10||10)} уровней`;
+ $('upgradeCount').textContent=`${s.upgrades.length}/200`;renderUpgrades();renderCollection();renderProgress()
+}
+function popup(text){$('toast').textContent=text;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),1100)}
+function tap(){
+ tapCharacter();
+ let crit=Math.random()<Math.min(.55,.06+s.upgrades.filter(x=>x>=20&&x<30).length*.012);
+ let gain=s.click*(crit?10:1);s.coins+=gain;s.totalClicks++;
+ s.level=Math.min(1000,1+Math.floor(s.totalClicks/12));
+ let e=document.createElement('div');e.className='float';e.textContent=(crit?'КРИТ ×10  ':'+')+fmt(gain);e.style.left=(35+Math.random()*30)+'%';e.style.top='54%';$('home').append(e);setTimeout(()=>e.remove(),800);
+ if(crit) popup('КРИТИЧЕСКИЙ ТЫК!');
+ if(s.totalClicks===777&&!s.secrets.includes(1)){s.secrets.push(1);s.collection[19]=true;popup('СЕКРЕТ ОТКРЫТ!')}
+ if(s.totalClicks%100===0)s.quests[0]++;
+ if(s.level%10===0) s.collection[Math.min(19,Math.floor(s.level/50))]=true;
+ render();save()
+}
+function buy(i){
+ if(s.upgrades.includes(i)||s.coins<costs[i])return;
+ s.coins-=costs[i];s.upgrades.push(i);
+ if(i<10)s.click+=2+i;
+ else if(i<20)s.dps+=5*Math.pow(1.17,i-9);
+ else if(i<30)s.click*=1.12;
+ else if(i<40)s.dps*=1.12;
+ else if(i<50)s.click*=1.08;
+ else s.click*=1.04;
+ if(i===99)popup('СЕКРЕТНЫЙ БОНУС!');render();save()
+}
+function renderUpgrades(){
+ $('upgradeList').innerHTML=upgradeNames.map((n,i)=>{let bought=s.upgrades.includes(i),available=i<=Math.min(199,10+Math.floor(s.level/4));
+ return `<div class="card shopitem"><div class="row"><div><b>${n}</b><div class="muted">${i<10?'+ к клику':i<20?'+ автодоход':i<30?'+ критической силе':'+ к общей эффективности'}</div></div><button class="buy" onclick="buy(${i})" ${bought||!available||s.coins<costs[i]?'disabled':''}>${bought?'КУПЛЕНО':fmt(costs[i])+' ТЫК'}</button></div></div>`}).join('')
+}
+const CHARACTER_COUNT=20;
+let activeCharacter=0;
+let tapTimer=null;
+function characterPath(i,variant='normal'){return `assets/char${String(i+1).padStart(2,'0')}_${variant}.PNG`}
+function backgroundPath(i){return `assets/background/bg${String(i+1).padStart(2,'0')}.JPEG`}
+function setCharacter(i){
+ activeCharacter=Math.max(0,Math.min(CHARACTER_COUNT-1,i));
+ const img=$('characterImage');
+ const stage=$('characterStage');
+ if(img) img.src=characterPath(activeCharacter,'normal');
+ if(stage) stage.style.backgroundImage=`url("${backgroundPath(activeCharacter)}")`;
+}
+function tapCharacter(){
+ const img=$('characterImage');
+ if(!img)return;
+ clearTimeout(tapTimer);
+ img.src=characterPath(activeCharacter,'tap');
+ tapTimer=setTimeout(()=>{img.src=characterPath(activeCharacter,'normal')},500);
+}
+function renderCollection(){
+ let n=s.collection.filter(Boolean).length;$('collectionCount').textContent=`${n}/${CHARACTER_COUNT}`;
+ $('collectionGrid').innerHTML=Array.from({length:CHARACTER_COUNT},(_,i)=>{
+   const u=s.collection[i];
+   return `<button class="creature-card ${u?'':'locked'}" ${u?'':'disabled'} onclick="setCharacter(${i})"><img src="${characterPath(i,'normal')}" onerror="this.src=characterPath(0,'normal')"><b>Персонаж ${String(i+1).padStart(2,'0')}</b><div class="muted">${u?'Открыт':'Скрыто'}</div></button>`
+ }).join('')
+}
+function renderProgress(){
+ $('cycle').textContent=s.cycle;$('pLevel').textContent=s.level;
+ const day=new Date().toISOString().slice(0,10);let claimed=s.lastDaily===day;
+ $('dailyText').textContent=claimed?'Сегодня награда уже получена. Возвращайся завтра.':'Сегодня: 5 000 ТЫКОВ + 1 Искра';
+ $('dailyBtn').disabled=claimed;$('dailyBtn').textContent=claimed?'ПОЛУЧЕНО':'ЗАБРАТЬ';
+ $('quests').innerHTML=[['Сделай 100 кликов',s.quests[0],100],['Купи 3 улучшения',s.upgrades.length,3],['Открой 2 персонажей',s.collection.filter(Boolean).length,2]].map((q,i)=>`<div class="row"><span>${q[0]}<br><small>${Math.min(q[1],q[2])}/${q[2]}</small></span><span class="tag">${q[1]>=q[2]?'ГОТОВО':'В ПРОЦЕССЕ'}</span></div>`).join('');
+ $('prestigeBtn').disabled=s.level<1000;
+ $('secrets').innerHTML=`Найдено ${s.secrets.length}/20 <span class="tag">777 кликов</span><span class="tag">???</span><span class="tag">???</span>`
+}
+$('tap').onclick=tap;$('target').onclick=tap;
+$('dailyBtn').onclick=()=>{let day=new Date().toISOString().slice(0,10);if(s.lastDaily===day)return;s.coins+=5000;s.sparks++;s.lastDaily=day;popup('ЕЖЕДНЕВНАЯ НАГРАДА!');render();save()}
+$('prestigeBtn').onclick=()=>{if(s.level<1000)return;let gain=Math.max(1,Math.floor(s.level/100));s.sparks+=gain;s.cycle++;s.level=1;s.coins=0;s.click=1+s.sparks*.12;s.dps=0;s.upgrades=[];s.totalClicks=0;popup('ПЕРЕРОЖДЕНИЕ!');render();save()}
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>{document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));$(b.dataset.go).classList.add('active')});
+setInterval(()=>{if(s.dps){s.coins+=s.dps;render();save()}},1000);
+const offline=Math.min(8*3600,Math.max(0,Math.floor((Date.now()-s.last)/1000)));if(offline>15&&s.dps){s.coins+=offline*s.dps;setTimeout(()=>popup('ОФЛАЙН: +'+fmt(offline*s.dps)),300)}
+setCharacter(0);setCharacter(0);render();save();
+
+
+/* ===== 20 CHARACTER COLLECTION ===== */
+(function(){
+  const oldNames = [
+    "Тыквенок","Квадратик","Пузырёк","Шлёпа","Желейка","Кусь","Плюш","Бублик",
+    "Пиксель","Кекс","Лапка","Глазастик","Крабик","Мармелад","Блинчик","Пончик"
+  ];
+  const worlds = [
+    ["Двор", "#6fa56f"],["Город","#7187b8"],["Джунгли","#5b9a62"],["Океан","#4d8fb8"],
+    ["Пустыня","#c99a59"],["Космос","#59639d"],["Ад","#a44d4d"],["Лёд","#77a9bd"],
+    ["Мозг","#a16b91"],["Ничего","#303039"]
+  ];
+  const rarity = ["Обычный","Необычный","Редкий","Эпический","Легендарный","Секретный"];
+  const prefixes = ["Тык","Пуп","Буп","Кусь","Мега","Супер","Нано","Пикс","Бит","Гига",
+                    "Квант","Нео","Крип","Зум","Шлёп","Чад","Лох","Кибер","Глитч","Ультра"];
+  const suffixes = ["ик","ыч","он","арь","оид","яра","чик","боб","мен","трон",
+                    "ус","ун","атор","уля","икс","бум","краб","мозг","пёс","кот"];
+
+  function makeName(i){
+    if(i < oldNames.length) return oldNames[i];
+    const p = prefixes[(i*7)%prefixes.length];
+    const s = suffixes[(i*13)%suffixes.length];
+    return p+s+" "+(i+1);
+  }
+  function makeRarity(i){
+    if(i >= 490) return "Секретный";
+    if(i >= 450) return "Легендарный";
+    if(i >= 350) return "Эпический";
+    if(i >= 220) return "Редкий";
+    if(i >= 100) return "Необычный";
+    return "Обычный";
+  }
+  const chars = Array.from({length:20}, (_,i)=>({
+    id:i+1, name:makeName(i), world:Math.min(9,Math.floor(i/50)),
+    rarity:makeRarity(i), unlocked:i===0
+  }));
+
+  // 20 characters: one new character every 50 levels, with the first available immediately.
+  function unlockedCount(level){
+    return Math.max(1, Math.min(20, Math.floor((Math.max(1,level)-1)/50)+1));
+  }
+
+  window.TYKNI_COLLECTION = chars;
+  window.TYKNI_UNLOCKED_COUNT = unlockedCount;
+
+  // Fix any existing collection rendering by intercepting common panel functions.
+  function renderCollection(){
+    const count = unlockedCount(window.s?.level || 1);
+    const overlay = document.createElement("div");
+    overlay.className = "tykni-modal-overlay";
+    overlay.innerHTML = `
+      <div class="tykni-modal">
+        <div class="tykni-modal-head">
+          <div>
+            <div class="tykni-modal-title">КОЛЛЕКЦИЯ</div>
+            <div class="tykni-modal-sub">${count} / 20 собрано</div>
+          </div>
+          <button class="tykni-close">ЗАКРЫТЬ</button>
+        </div>
+        <div class="tykni-progress"><i style="width:${count/20*100}%"></i></div>
+        <div class="tykni-collection-grid">
+          ${chars.map((c,i)=>{
+            const u=i<count;
+            const col=worlds[c.world][1];
+            return `<button class="tykni-card ${u?'':'locked'}" ${u?'':'disabled'} onclick="if(${u})setCharacter(${i})">
+              <div class="tykni-avatar" style="--w:${col}"><img src="${u?characterPath(i,'normal'):characterPath(0,'normal')}" onerror="this.src=characterPath(0,'normal')"></div>
+              <b>${u?c.name:"ЗАКРЫТО"}</b>
+              <small>${u?c.rarity:("Уровень "+((i*2)+1))}</small>
+            </button>`;
+          }).join("")}
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close=()=>overlay.remove();
+    overlay.querySelector(".tykni-close").onclick=close;
+    overlay.addEventListener("click",e=>{if(e.target===overlay)close()});
+  }
+
+  // Add independent final UI styles.
+  const st=document.createElement("style");
+  st.textContent=`
+  .tykni-modal-overlay{position:fixed!important;inset:0!important;background:rgba(0,0,0,.68);z-index:100000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:12px!important;overflow:hidden!important}
+  .tykni-modal{width:min(760px,100%);height:min(88dvh,900px);background:#15171c;border:1px solid #3a3e48;border-radius:22px;box-shadow:0 20px 80px #000b;display:flex;flex-direction:column;overflow:hidden;color:#fff}
+  .tykni-modal-head{padding:16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid #30333b;flex:none}
+  .tykni-modal-title{font-weight:900;font-size:22px;letter-spacing:.5px}.tykni-modal-sub{opacity:.65;margin-top:3px;font-size:13px}
+  .tykni-close{border:1px solid #444955;background:#242832;color:#fff;border-radius:12px;padding:10px 12px;font-weight:800}
+  .tykni-progress{height:7px;margin:12px 16px;background:#2b2e36;border-radius:99px;overflow:hidden;flex:none}.tykni-progress i{display:block;height:100%;background:#fff;border-radius:99px}
+  .tykni-collection-grid{padding:4px 16px 24px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;overflow-y:auto;min-height:0;-webkit-overflow-scrolling:touch}
+  .tykni-card{min-width:0;background:#20232a;border:1px solid #343843;border-radius:15px;color:#fff;padding:9px;text-align:left}
+  .tykni-card.locked{opacity:.42}.tykni-avatar{aspect-ratio:1;border-radius:12px;background:linear-gradient(135deg,var(--w),#222);display:grid;place-items:center;font-weight:1000;font-size:22px;margin-bottom:7px}
+  .tykni-avatar img{width:100%;height:100%;object-fit:contain;border-radius:12px}.tykni-card b,.tykni-card small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.tykni-card small{opacity:.58;margin-top:2px}
+  @media(max-width:600px){.tykni-modal{height:calc(100dvh - 20px);border-radius:18px}.tykni-collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:4px 11px 20px}.tykni-modal-head{padding:13px}.tykni-modal-title{font-size:19px}}
+  `;
+  document.head.appendChild(st);
+
+  // Buttons in the existing app: replace collection action when its label is detected.
+  document.addEventListener("click", function(e){
+    const b=e.target.closest("button");
+    if(!b) return;
+    const t=(b.textContent||"").trim().toLowerCase();
+    if(t==="коллекция" || t.includes("коллекция")){
+      e.preventDefault(); e.stopPropagation();
+      // Close old panels if any.
+      document.querySelectorAll(".modal,.panel,.overlay").forEach(x=>{ if(x !== b.closest(".overlay")) x.remove?.() });
+      renderCollection();
+    }
+  }, true);
+})();
+</script>
+
+</body></html>
